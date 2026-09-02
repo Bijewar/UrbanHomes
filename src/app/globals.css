@@ -1,0 +1,285 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Boutique brand palette */
+  --color-ivory: #FAF8F5;
+  --color-warm-white: #FFFFFF;
+  --color-stone: #E8E4DE;
+  --color-taupe: #D8CFC2;
+  --color-charcoal: #2B2B2B;
+  --color-bronze: #B8894F;
+  --color-terracotta: #C1704D;
+  --color-bronze-soft: #D4B486;
+}
+
+:root {
+  --radius: 0.625rem;
+  /* Light theme — boutique design-build studio */
+  --background: #FAF8F5;
+  --foreground: #2B2B2B;
+  --card: #FFFFFF;
+  --card-foreground: #2B2B2B;
+  --popover: #FFFFFF;
+  --popover-foreground: #2B2B2B;
+  --primary: #B8894F;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8E4DE;
+  --secondary-foreground: #2B2B2B;
+  --muted: #F2EFE9;
+  --muted-foreground: #6B6258;
+  --accent: #C1704D;
+  --accent-foreground: #FFFFFF;
+  --destructive: #B3261E;
+  --border: #E8E4DE;
+  --input: #E8E4DE;
+  --ring: #B8894F;
+  --chart-1: #B8894F;
+  --chart-2: #C1704D;
+  --chart-3: #D8CFC2;
+  --chart-4: #6B6258;
+  --chart-5: #2B2B2B;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #2B2B2B;
+  --sidebar-primary: #B8894F;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FAF8F5;
+  --sidebar-accent-foreground: #2B2B2B;
+  --sidebar-border: #E8E4DE;
+  --sidebar-ring: #B8894F;
+}
+
+.dark {
+  --background: #1a1916;
+  --foreground: #FAF8F5;
+  --card: #24221d;
+  --card-foreground: #FAF8F5;
+  --popover: #24221d;
+  --popover-foreground: #FAF8F5;
+  --primary: #D4B486;
+  --primary-foreground: #1a1916;
+  --secondary: #2B2B2B;
+  --secondary-foreground: #FAF8F5;
+  --muted: #2B2B2B;
+  --muted-foreground: #B8AFA1;
+  --accent: #C1704D;
+  --accent-foreground: #FAF8F5;
+  --destructive: #B3261E;
+  --border: #3a3530;
+  --input: #3a3530;
+  --ring: #D4B486;
+  --sidebar: #24221d;
+  --sidebar-foreground: #FAF8F5;
+  --sidebar-primary: #D4B486;
+  --sidebar-primary-foreground: #1a1916;
+  --sidebar-accent: #2B2B2B;
+  --sidebar-accent-foreground: #FAF8F5;
+  --sidebar-border: #3a3530;
+  --sidebar-ring: #D4B486;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    background-color: #FAF8F5;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-playfair), Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ===== Boutique utility classes ===== */
+.font-serif { font-family: var(--font-playfair), Georgia, serif; }
+.font-sans { font-family: var(--font-inter), system-ui, sans-serif; }
+
+.smallcaps-label {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--bronze);
+}
+
+.hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(184, 137, 79, 0.45), transparent);
+}
+
+.text-balance { text-wrap: balance; }
+
+/* Bronze underline draw-in on links */
+.link-underline {
+  position: relative;
+  display: inline-block;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background: var(--bronze);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Card lift on hover */
+.card-lift {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 50px -20px rgba(43, 43, 43, 0.18),
+              0 8px 16px -10px rgba(184, 137, 79, 0.18);
+}
+
+/* Image zoom */
+.img-zoom { overflow: hidden; }
+.img-zoom img {
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.img-zoom:hover img {
+  transform: scale(1.06);
+}
+
+/* Premium button */
+.btn-bronze {
+  background: var(--bronze);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.85rem 1.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.4s, box-shadow 0.4s;
+  box-shadow: 0 8px 20px -8px rgba(184, 137, 79, 0.55);
+}
+.btn-bronze:hover {
+  background: #a4763e;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 14px 26px -10px rgba(184, 137, 79, 0.65);
+}
+.btn-bronze:active { transform: translateY(0) scale(0.99); }
+
+.btn-outline-bronze {
+  background: transparent;
+  color: var(--charcoal);
+  border: 1px solid var(--bronze);
+  border-radius: 999px;
+  padding: 0.85rem 1.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: background 0.4s, color 0.4s, transform 0.4s;
+}
+.btn-outline-bronze:hover {
+  background: var(--bronze);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Floating quote button pulse */
+@keyframes quotePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(184, 137, 79, 0.5); }
+  50% { box-shadow: 0 0 0 14px rgba(184, 137, 79, 0); }
+}
+.quote-pulse { animation: quotePulse 2.6s infinite; }
+
+/* Custom scrollbar (for portfolio list etc.) */
+.scroll-premium::-webkit-scrollbar { width: 8px; }
+.scroll-premium::-webkit-scrollbar-track { background: transparent; }
+.scroll-premium::-webkit-scrollbar-thumb {
+  background: var(--taupe);
+  border-radius: 999px;
+}
+
+/* Marquee for testimonials */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee 42s linear infinite;
+  display: flex;
+  width: max-content;
+}
+.marquee-track:hover { animation-play-state: paused; }
+
+/* Hide scrollbar on lightbox thumbnails */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Glass navbar */
+.nav-glass {
+  background: rgba(250, 248, 245, 0.78);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid rgba(184, 137, 79, 0.12);
+}
+.nav-solid {
+  background: #FAF8F5;
+  border-bottom: 1px solid rgba(184, 137, 79, 0.18);
+  box-shadow: 0 6px 24px -16px rgba(43, 43, 43, 0.18);
+}
+
+/* Soft section dividers */
+.divider-stone {
+  background: linear-gradient(180deg, #FAF8F5, #F2EFE9);
+}
