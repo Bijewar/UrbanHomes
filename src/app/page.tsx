@@ -27,7 +27,7 @@ export default function Home() {
         <Testimonials />
         <section
           id="quote"
-          className="scroll-mt-24 divider-stone px-5 py-20 sm:px-8 md:py-28"
+          className="scroll-mt-24 divider-stone px-4 py-20 sm:px-8 md:py-28 overflow-hidden"
         >
           <QuoteForm />
         </section>

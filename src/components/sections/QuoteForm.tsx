@@ -406,7 +406,7 @@ export default function QuoteForm({ compact = false, onSubmitted }: Props) {
           className={cn(
             "rounded-3xl border border-[#E8E4DE] bg-white",
             "shadow-[0_24px_60px_-30px_rgba(43,43,43,0.18)]",
-            compact ? "p-6 sm:p-7" : "p-7 sm:p-10 md:p-12",
+            compact ? "p-4 sm:p-6 md:p-7" : "p-4 sm:p-7 md:p-10 lg:p-12",
           )}
         >
           {/* Header */}
@@ -650,7 +650,7 @@ export default function QuoteForm({ compact = false, onSubmitted }: Props) {
 function StepIndicator({ currentStep }: { currentStep: number }) {
   return (
     <div className="mt-6 flex items-center justify-center">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         {STEPS.map((label, i) => {
           const isActive = i === currentStep;
           const isDone = i < currentStep;
@@ -660,15 +660,15 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 <span
                   aria-hidden
                   className={cn(
-                    "h-px w-8 sm:w-12",
+                    "h-px w-5 sm:w-10 md:w-12",
                     isDone || isActive ? "bg-[#B8894F]" : "bg-[#E8E4DE]",
                   )}
                 />
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <span
                   className={cn(
-                    "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-colors",
+                    "flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-full text-[10px] sm:text-xs font-semibold transition-colors",
                     isDone
                       ? "bg-[#B8894F] text-white"
                       : isActive
@@ -677,14 +677,14 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                   )}
                 >
                   {isDone ? (
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   ) : (
                     i + 1
                   )}
                 </span>
                 <span
                   className={cn(
-                    "text-xs font-medium uppercase tracking-[0.16em] transition-colors",
+                    "text-[10px] sm:text-xs font-medium uppercase tracking-[0.08em] sm:tracking-[0.16em] transition-colors whitespace-nowrap",
                     isActive ? "text-[#2B2B2B]" : "text-[#6B6258]",
                   )}
                 >
