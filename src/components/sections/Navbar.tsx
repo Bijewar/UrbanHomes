@@ -8,7 +8,6 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
-  SheetClose,
 } from "@/components/ui/sheet";
 
 type NavLink = { label: string; href: string };
@@ -141,20 +140,7 @@ export default function Navbar() {
                 ))}
               </ul>
 
-              <div className="mt-auto pb-8 pt-6">
-                <SheetClose asChild>
-                  <a
-                    href="#quote"
-                    onClick={(e) => handleNav(e, "#quote")}
-                    className="btn-bronze block w-full text-center"
-                  >
-                    Get a Free Quote
-                  </a>
-                </SheetClose>
-                <p className="mt-4 text-center text-xs tracking-wide text-[#6B6258]">
-                  Real photos, real review · Reply on WhatsApp
-                </p>
-              </div>
+
             </div>
           </SheetContent>
         </Sheet>
