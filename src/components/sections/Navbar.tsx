@@ -83,13 +83,7 @@ export default function Navbar() {
         </ul>
 
         {/* Desktop CTA */}
-        <a
-          href="#quote"
-          onClick={(e) => handleNav(e, "#quote")}
-          className="btn-bronze hidden text-sm md:inline-block"
-        >
-          Get a Quote
-        </a>
+       
 
         {/* Mobile trigger */}
         <Sheet open={open} onOpenChange={setOpen}>
