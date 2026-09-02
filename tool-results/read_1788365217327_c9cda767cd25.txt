@@ -1,0 +1,1021 @@
+     1→"use client";
+     2→
+     3→import { useCallback, useEffect, useRef, useState } from "react";
+     4→import { Controller, useForm } from "react-hook-form";
+     5→import { zodResolver } from "@hookform/resolvers/zod";
+     6→import { z } from "zod";
+     7→import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+     8→import { useDropzone, type FileRejection } from "react-dropzone";
+     9→import {
+    10→  ArrowLeft,
+    11→  CheckCircle2,
+    12→  ImagePlus,
+    13→  Loader2,
+    14→  Pencil,
+    15→  UploadCloud,
+    16→  X,
+    17→} from "lucide-react";
+    18→import { Input } from "@/components/ui/input";
+    19→import { Label } from "@/components/ui/label";
+    20→import { Textarea } from "@/components/ui/textarea";
+    21→import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+    22→import {
+    23→  Select,
+    24→  SelectContent,
+    25→  SelectItem,
+    26→  SelectTrigger,
+    27→  SelectValue,
+    28→} from "@/components/ui/select";
+    29→import { useToast } from "@/hooks/use-toast";
+    30→import { Reveal } from "@/components/motion/Reveal";
+    31→import { cn } from "@/lib/utils";
+    32→
+    33→/* ---------- Constants ---------- */
+    34→
+    35→const SERVICE_OPTIONS = [
+    36→  "Civil Engineering",
+    37→  "Architecture & Design",
+    38→  "Painting & Finishing",
+    39→  "Other",
+    40→] as const;
+    41→type ServiceType = (typeof SERVICE_OPTIONS)[number];
+    42→
+    43→const CONTACT_TIMES = ["Morning", "Afternoon", "Evening"] as const;
+    44→type ContactTime = (typeof CONTACT_TIMES)[number];
+    45→
+    46→const STEPS = ["Contact", "Project", "Photos", "Review"] as const;
+    47→const MAX_IMAGES = 5;
+    48→const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    49→
+    50→/* ---------- Validation schema ---------- */
+    51→
+    52→const quoteSchema = z.object({
+    53→  fullName: z
+    54→    .string()
+    55→    .min(2, "Please enter your full name (at least 2 characters)."),
+    56→  email: z.string().email("Please enter a valid email address."),
+    57→  phone: z.string().optional(),
+    58→  contactTime: z.enum(CONTACT_TIMES).optional(),
+    59→  serviceType: z.enum(SERVICE_OPTIONS, {
+    60→    errorMap: () => ({ message: "Please select a service." }),
+    61→  }),
+    62→  location: z.string().optional(),
+    63→  description: z
+    64→    .string()
+    65→    .min(20, "Please add a bit more detail (at least 20 characters)."),
+    66→  images: z
+    67→    .array(z.instanceof(File))
+    68→    .min(1, "Please upload at least one photo of the space."),
+    69→  company_url: z.string().optional(), // honeypot — must stay blank
+    70→});
+    71→
+    72→type QuoteFormValues = z.infer<typeof quoteSchema>;
+    73→
+    74→/* ---------- Local uploaded image type ---------- */
+    75→
+    76→type UploadedImage = {
+    77→  id: string;
+    78→  file: File;
+    79→  preview: string;
+    80→  progress: number; // 0..100 (simulated)
+    81→};
+    82→
+    83→/* ---------- Props ---------- */
+    84→
+    85→interface QuoteFormProps {
+    86→  /** Render at a slightly smaller scale — used inside the floating-button Sheet. */
+    87→  compact?: boolean;
+    88→  /** Called after a successful submission (useful to auto-close the sheet). */
+    89→  onSubmitted?: () => void;
+    90→}
+    91→
+    92→/* ===================================================================== */
+    93→/* Component                                                              */
+    94→/* ===================================================================== */
+    95→
+    96→export default function QuoteForm({
+    97→  compact = false,
+    98→  onSubmitted,
+    99→}: QuoteFormProps) {
+   100→  const { toast } = useToast();
+   101→  const reduce = useReducedMotion();
+   102→
+   103→  const [step, setStep] = useState(0);
+   104→  const [submitted, setSubmitted] = useState(false);
+   105→  const [submitting, setSubmitting] = useState(false);
+   106→  const [showCheck, setShowCheck] = useState(false);
+   107→  const [images, setImages] = useState<UploadedImage[]>([]);
+   108→  const timersRef = useRef<ReturnType<typeof setInterval>[]>([]);
+   109→
+   110→  const {
+   111→    register,
+   112→    handleSubmit,
+   113→    trigger,
+   114→    setValue,
+   115→    watch,
+   116→    control,
+   117→    reset,
+   118→    formState: { errors },
+   119→  } = useForm<QuoteFormValues>({
+   120→    resolver: zodResolver(quoteSchema),
+   121→    defaultValues: {
+   122→      fullName: "",
+   123→      email: "",
+   124→      phone: "",
+   125→      contactTime: undefined,
+   126→      serviceType: undefined,
+   127→      location: "",
+   128→      description: "",
+   129→      images: [],
+   130→      company_url: "",
+   131→    },
+   132→    mode: "onChange",
+   133→  });
+   134→
+   135→  /* ---------- Dropzone ---------- */
+   136→
+   137→  const onDrop = useCallback(
+   138→    (accepted: File[], rejections: FileRejection[]) => {
+   139→      if (rejections.length > 0) {
+   140→        const first = rejections[0];
+   141→        const tooBig = first.errors.find((e) => e.code === "file-too-large");
+   142→        if (tooBig) {
+   143→          toast({
+   144→            title: "File too large",
+   145→            description: "Each image must be 10MB or less.",
+   146→            variant: "destructive",
+   147→          });
+   148→        }
+   149→      }
+   150→      const remaining = MAX_IMAGES - images.length;
+   151→      if (remaining <= 0) {
+   152→        toast({
+   153→          title: "Maximum 5 images",
+   154→          description: "Remove an existing image to add more.",
+   155→          variant: "destructive",
+   156→        });
+   157→        return;
+   158→      }
+   159→      const toAdd = accepted.slice(0, remaining);
+   160→      if (accepted.length > remaining) {
+   161→        toast({
+   162→          title: "Maximum 5 images",
+   163→          description: "Only the first 5 were added.",
+   164→        });
+   165→      }
+   166→      toAdd.forEach((file) => {
+   167→        const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+   168→        const preview = URL.createObjectURL(file);
+   169→        const newImg: UploadedImage = { id, file, preview, progress: 0 };
+   170→        setImages((prev) => [...prev, newImg]);
+   171→        // Simulated upload progress bar (animate 0 -> 100 over ~800ms)
+   172→        let p = 0;
+   173→        const interval = setInterval(() => {
+   174→          p += 14 + Math.random() * 14;
+   175→          if (p >= 100) {
+   176→            p = 100;
+   177→            clearInterval(interval);
+   178→            const idx = timersRef.current.indexOf(interval);
+   179→            if (idx >= 0) timersRef.current.splice(idx, 1);
+   180→          }
+   181→          setImages((prev) =>
+   182→            prev.map((img) =>
+   183→              img.id === id ? { ...img, progress: p } : img
+   184→            ),
+   185→          );
+   186→        }, 100);
+   187→        timersRef.current.push(interval);
+   188→      });
+   189→    },
+   190→    [images.length, toast],
+   191→  );
+   192→
+   193→  const { getRootProps, getInputProps, isDragActive, open: openDialog } =
+   194→    useDropzone({
+   195→      onDrop,
+   196→      accept: {
+   197→        "image/jpeg": [".jpg", ".jpeg"],
+   198→        "image/png": [".png"],
+   199→        "image/heic": [".heic"],
+   200→        "image/webp": [".webp"],
+   201→      },
+   202→      maxSize: MAX_FILE_SIZE,
+   203→      maxFiles: MAX_IMAGES,
+   204→      noClick: true,
+   205→      noKeyboard: true,
+   206→    });
+   207→
+   208→  /* ---------- Sync images -> RHF ---------- */
+   209→
+   210→  useEffect(() => {
+   211→    setValue("images", images.map((img) => img.file), {
+   212→      shouldValidate: step === 2,
+   213→      shouldDirty: true,
+   214→    });
+   215→  }, [images, setValue, step]);
+   216→
+   217→  /* ---------- Cleanup on unmount ---------- */
+   218→
+   219→  useEffect(() => {
+   220→    return () => {
+   221→      timersRef.current.forEach((t) => clearInterval(t));
+   222→      timersRef.current = [];
+   223→      images.forEach((img) => URL.revokeObjectURL(img.preview));
+   224→    };
+   225→  }, []);
+   226→
+   227→  const removeImage = (id: string) => {
+   228→    setImages((prev) => {
+   229→      const target = prev.find((img) => img.id === id);
+   230→      if (target) URL.revokeObjectURL(target.preview);
+   231→      return prev.filter((img) => img.id !== id);
+   232→    });
+   233→  };
+   234→
+   235→  /* ---------- Step navigation ---------- */
+   236→
+   237→  const handleContinue = async () => {
+   238→    let valid = true;
+   239→    if (step === 0) {
+   240→      valid = await trigger(["fullName", "email"]);
+   241→    } else if (step === 1) {
+   242→      valid = await trigger(["serviceType", "description"]);
+   243→    } else if (step === 2) {
+   244→      valid = await trigger(["images"]);
+   245→    }
+   246→    if (valid) {
+   247→      setStep((s) => Math.min(s + 1, STEPS.length - 1));
+   248→    }
+   249→  };
+   250→
+   251→  const handleBack = () => setStep((s) => Math.max(s - 1, 0));
+   252→  const jumpToStep = (target: number) => setStep(target);
+   253→
+   254→  /* ---------- Submit ---------- */
+   255→
+   256→  const onSubmit = async (data: QuoteFormValues) => {
+   257→    // Honeypot — silently succeed without sending any email
+   258→    if (data.company_url) {
+   259→      setSubmitting(true);
+   260→      setTimeout(() => {
+   261→        setSubmitting(false);
+   262→        setShowCheck(true);
+   263→        setTimeout(() => {
+   264→          setSubmitted(true);
+   265→          setShowCheck(false);
+   266→          onSubmitted?.();
+   267→        }, 1100);
+   268→      }, 600);
+   269→      return;
+   270→    }
+   271→
+   272→    setSubmitting(true);
+   273→    try {
+   274→      const formData = new FormData();
+   275→      formData.append("fullName", data.fullName);
+   276→      formData.append("email", data.email);
+   277→      if (data.phone) formData.append("phone", data.phone);
+   278→      if (data.contactTime) formData.append("contactTime", data.contactTime);
+   279→      formData.append("serviceType", data.serviceType);
+   280→      if (data.location) formData.append("location", data.location);
+   281→      formData.append("description", data.description);
+   282→      formData.append("company_url", data.company_url ?? "");
+   283→      images.forEach((img) => {
+   284→        formData.append("images", img.file, img.file.name);
+   285→      });
+   286→
+   287→      const res = await fetch("/api/quote", {
+   288→        method: "POST",
+   289→        body: formData,
+   290→      });
+   291→
+   292→      if (!res.ok) {
+   293→        const errJson = (await res.json().catch(() => null)) as
+   294→          | { error?: string }
+   295→          | null;
+   296→        throw new Error(
+   297→          errJson?.error ?? "Something went wrong. Please try again.",
+   298→        );
+   299→      }
+   300→
+   301→      setSubmitting(false);
+   302→      setShowCheck(true);
+   303→      setTimeout(() => {
+   304→        setSubmitted(true);
+   305→        setShowCheck(false);
+   306→        onSubmitted?.();
+   307→      }, 1100);
+   308→    } catch (err) {
+   309→      setSubmitting(false);
+   310→      const message =
+   311→        err instanceof Error ? err.message : "Something went wrong.";
+   312→      toast({
+   313→        title: "Could not send request",
+   314→        description: message,
+   315→        variant: "destructive",
+   316→      });
+   317→    }
+   318→  };
+   319→
+   320→  /* ---------- Reset ---------- */
+   321→
+   322→  const resetForm = () => {
+   323→    images.forEach((img) => URL.revokeObjectURL(img.preview));
+   324→    setImages([]);
+   325→    reset();
+   326→    setStep(0);
+   327→    setSubmitted(false);
+   328→    setShowCheck(false);
+   329→    setSubmitting(false);
+   330→  };
+   331→
+   332→  /* ---------- Watch for the Review step ---------- */
+   333→
+   334→  const watched = watch();
+   335→
+   336→  /* ---------- Derived ---------- */
+   337→
+   338→  const stepVariants = {
+   339→    enter: (direction: number) => ({
+   340→      x: reduce ? 0 : direction > 0 ? 28 : -28,
+   341→      opacity: 0,
+   342→    }),
+   343→    center: { x: 0, opacity: 1 },
+   344→    exit: (direction: number) => ({
+   345→      x: reduce ? 0 : direction > 0 ? -28 : 28,
+   346→      opacity: 0,
+   347→    }),
+   348→  };
+   349→
+   350→  const cardClasses = cn(
+   351→    "bg-white rounded-3xl border border-[#E8E4DE] shadow-[0_24px_60px_-30px_rgba(43,43,43,0.18)] mx-auto",
+   352→    compact ? "w-full p-6 sm:p-7" : "max-w-3xl p-8 md:p-12",
+   353→  );
+   354→
+   355→  const headerBlock = (
+   356→    <div className={cn("text-center", compact ? "mb-6" : "mb-10")}>
+   357→      <span className="smallcaps-label">Request a Quote</span>
+   358→      <h2 className="mt-3 font-serif text-[#2B2B2B] text-balance text-2xl md:text-4xl">
+   359→        Real photos. Real review. Real pricing.
+   360→      </h2>
+   361→      <div className="hairline mx-auto my-5 w-20" />
+   362→      <p className="mx-auto max-w-xl text-sm leading-relaxed text-[#6B6258] md:text-base">
+   363→        Show us the space — a few clear photos help our team give you the most
+   364→        accurate quote. No instant estimates, just a thoughtful one within
+   365→        24–48 hours.
+   366→      </p>
+   367→    </div>
+   368→  );
+   369→
+   370→  const formContent = (
+   371→    <div className={cardClasses}>
+   372→      <AnimatePresence mode="wait">
+   373→        {submitted ? (
+   374→          <motion.div
+   375→            key="success"
+   376→            initial={{ opacity: 0, y: reduce ? 0 : 14 }}
+   377→            animate={{ opacity: 1, y: 0 }}
+   378→            exit={{ opacity: 0, y: reduce ? 0 : -14 }}
+   379→            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+   380→            className="flex flex-col items-center justify-center py-10 text-center"
+   381→          >
+   382→            <motion.div
+   383→              initial={{ scale: 0.6, opacity: 0 }}
+   384→              animate={{ scale: 1, opacity: 1 }}
+   385→              transition={{
+   386→                duration: 0.55,
+   387→                ease: [0.22, 1, 0.36, 1],
+   388→                delay: 0.05,
+   389→              }}
+   390→              className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"
+   391→            >
+   392→              <CheckCircle2 className="h-9 w-9" />
+   393→            </motion.div>
+   394→            <h3 className="mt-6 font-serif text-2xl text-[#2B2B2B]">
+   395→              Thanks! Your request has been sent.
+   396→            </h3>
+   397→            <p className="mt-3 max-w-md text-sm leading-relaxed text-[#6B6258]">
+   398→              Check your email for confirmation — we&rsquo;ll follow up with
+   399→              your quote soon.
+   400→            </p>
+   401→            <button
+   402→              type="button"
+   403→              onClick={resetForm}
+   404→              className="link-underline mt-6 text-sm font-medium text-[#B8894F]"
+   405→            >
+   406→              Send another request
+   407→            </button>
+   408→          </motion.div>
+   409→        ) : (
+   410→          <motion.div
+   411→            key="form"
+   412→            initial={{ opacity: 0 }}
+   413→            animate={{ opacity: 1 }}
+   414→            exit={{ opacity: 0 }}
+   415→            transition={{ duration: 0.25 }}
+   416→          >
+   417→            {/* Progress indicator */}
+   418→            <div className={cn(compact ? "mb-6" : "mb-10")}>
+   419→              <ol className="flex items-center">
+   420→                {STEPS.map((label, i) => (
+   421→                  <li
+   422→                    key={label}
+   423→                    className={cn(
+   424→                      "flex items-center",
+   425→                      i < STEPS.length - 1 ? "flex-1" : "",
+   426→                    )}
+   427→                  >
+   428→                    <div className="flex flex-col items-center gap-2">
+   429→                      <div
+   430→                        className={cn(
+   431→                          "flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-500",
+   432→                          i === step &&
+   433→                            "border-[#B8894F] bg-[#B8894F] text-white shadow-[0_8px_18px_-8px_rgba(184,137,79,0.65)]",
+   434→                          i < step &&
+   435→                            "border-[#B8894F] bg-[#B8894F]/10 text-[#B8894F]",
+   436→                          i > step &&
+   437→                            "border-[#E8E4DE] bg-white text-[#6B6258]",
+   438→                        )}
+   439→                      >
+   440→                        {i < step ? (
+   441→                          <CheckCircle2 className="h-4 w-4" />
+   442→                        ) : (
+   443→                          i + 1
+   444→                        )}
+   445→                      </div>
+   446→                      <span
+   447→                        className={cn(
+   448→                          "text-[10px] uppercase tracking-[0.18em] font-semibold transition-colors duration-300",
+   449→                          i === step
+   450→                            ? "text-[#B8894F]"
+   451→                            : "text-[#6B6258]/80",
+   452→                        )}
+   453→                      >
+   454→                        {label}
+   455→                      </span>
+   456→                    </div>
+   457→                    {i < STEPS.length - 1 && (
+   458→                      <div
+   459→                        className={cn(
+   460→                          "mx-2 h-px flex-1 transition-colors duration-500",
+   461→                          i < step ? "bg-[#B8894F]" : "bg-[#E8E4DE]",
+   462→                        )}
+   463→                      />
+   464→                    )}
+   465→                  </li>
+   466→                ))}
+   467→              </ol>
+   468→            </div>
+   469→
+   470→            <form
+   471→              onSubmit={handleSubmit(onSubmit)}
+   472→              noValidate
+   473→              className="space-y-6"
+   474→            >
+   475→              {/* Honeypot — visually hidden, real users won't fill this */}
+   476→              <div
+   477→                aria-hidden
+   478→                className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden opacity-0"
+   479→              >
+   480→                <label htmlFor="company_url">Website (leave blank)</label>
+   481→                <input
+   482→                  id="company_url"
+   483→                  type="text"
+   484→                  tabIndex={-1}
+   485→                  autoComplete="off"
+   486→                  {...register("company_url")}
+   487→                />
+   488→              </div>
+   489→
+   490→              <AnimatePresence mode="wait" custom={1}>
+   491→                <motion.div
+   492→                  key={step}
+   493→                  custom={1}
+   494→                  variants={stepVariants}
+   495→                  initial="enter"
+   496→                  animate="center"
+   497→                  exit="exit"
+   498→                  transition={{
+   499→                    duration: reduce ? 0.2 : 0.35,
+   500→                    ease: [0.22, 1, 0.36, 1],
+   501→                  }}
+   502→                >
+   503→                  {/* Step 1 — Contact Info */}
+   504→                  {step === 0 && (
+   505→                    <div className="space-y-5">
+   506→                      <div className="space-y-2">
+   507→                        <Label htmlFor="fullName">
+   508→                          Full Name{" "}
+   509→                          <span className="text-[#B8894F]">*</span>
+   510→                        </Label>
+   511→                        <Input
+   512→                          id="fullName"
+   513→                          placeholder="Priya Menon"
+   514→                          aria-invalid={!!errors.fullName}
+   515→                          {...register("fullName")}
+   516→                        />
+   517→                        {errors.fullName && (
+   518→                          <p className="text-xs text-[#B3261E]">
+   519→                            {errors.fullName.message}
+   520→                          </p>
+   521→                        )}
+   522→                      </div>
+   523→
+   524→                      <div className="space-y-2">
+   525→                        <Label htmlFor="email">
+   526→                          Email{" "}
+   527→                          <span className="text-[#B8894F]">*</span>
+   528→                        </Label>
+   529→                        <Input
+   530→                          id="email"
+   531→                          type="email"
+   532→                          placeholder="priya@example.com"
+   533→                          aria-invalid={!!errors.email}
+   534→                          {...register("email")}
+   535→                        />
+   536→                        {errors.email && (
+   537→                          <p className="text-xs text-[#B3261E]">
+   538→                            {errors.email.message}
+   539→                          </p>
+   540→                        )}
+   541→                      </div>
+   542→
+   543→                      <div className="space-y-2">
+   544→                        <Label htmlFor="phone">Phone (optional)</Label>
+   545→                        <Input
+   546→                          id="phone"
+   547→                          type="tel"
+   548→                          placeholder="+91 98765 43210"
+   549→                          {...register("phone")}
+   550→                        />
+   551→                      </div>
+   552→
+   553→                      <div className="space-y-2">
+   554→                        <Label>Preferred Contact Time (optional)</Label>
+   555→                        <Controller
+   556→                          control={control}
+   557→                          name="contactTime"
+   558→                          render={({ field }) => (
+   559→                            <RadioGroup
+   560→                              value={field.value ?? ""}
+   561→                              onValueChange={(val) =>
+   562→                                field.onChange(val || undefined)
+   563→                              }
+   564→                              className="grid grid-cols-3 gap-3 pt-1"
+   565→                            >
+   566→                              {CONTACT_TIMES.map((time) => (
+   567→                                <Label
+   568→                                  key={time}
+   569→                                  htmlFor={`ct-${time}`}
+   570→                                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#E8E4DE] p-3 text-sm transition-colors hover:border-[#B8894F]/60 hover:bg-[#FAF8F5] has-[:checked]:border-[#B8894F] has-[:checked]:bg-[#B8894F]/8"
+   571→                                >
+   572→                                  <RadioGroupItem id={`ct-${time}`} value={time} />
+   573→                                  <span className="text-[#2B2B2B]">{time}</span>
+   574→                                </Label>
+   575→                              ))}
+   576→                            </RadioGroup>
+   577→                          )}
+   578→                        />
+   579→                      </div>
+   580→                    </div>
+   581→                  )}
+   582→
+   583→                  {/* Step 2 — Project Details */}
+   584→                  {step === 1 && (
+   585→                    <div className="space-y-5">
+   586→                      <div className="space-y-2">
+   587→                        <Label htmlFor="serviceType">
+   588→                          Service Type{" "}
+   589→                          <span className="text-[#B8894F]">*</span>
+   590→                        </Label>
+   591→                        <Controller
+   592→                          control={control}
+   593→                          name="serviceType"
+   594→                          render={({ field }) => (
+   595→                            <Select
+   596→                              value={field.value ?? ""}
+   597→                              onValueChange={field.onChange}
+   598→                            >
+   599→                              <SelectTrigger
+   600→                                id="serviceType"
+   601→                                className="w-full"
+   602→                                aria-invalid={!!errors.serviceType}
+   603→                              >
+   604→                                <SelectValue placeholder="Choose a service" />
+   605→                              </SelectTrigger>
+   606→                              <SelectContent>
+   607→                                {SERVICE_OPTIONS.map((opt) => (
+   608→                                  <SelectItem key={opt} value={opt}>
+   609→                                    {opt}
+   610→                                  </SelectItem>
+   611→                                ))}
+   612→                              </SelectContent>
+   613→                            </Select>
+   614→                          )}
+   615→                        />
+   616→                        {errors.serviceType && (
+   617→                          <p className="text-xs text-[#B3261E]">
+   618→                            {errors.serviceType.message}
+   619→                          </p>
+   620→                        )}
+   621→                      </div>
+   622→
+   623→                      <div className="space-y-2">
+   624→                        <Label htmlFor="location">
+   625→                          Location / Site Address (optional)
+   626→                        </Label>
+   627→                        <Input
+   628→                          id="location"
+   629→                          placeholder="e.g. Indiranagar, Bangalore 560038"
+   630→                          {...register("location")}
+   631→                        />
+   632→                      </div>
+   633→
+   634→                      <div className="space-y-2">
+   635→                        <Label htmlFor="description">
+   636→                          Project Description{" "}
+   637→                          <span className="text-[#B8894F]">*</span>
+   638→                        </Label>
+   639→                        <Textarea
+   640→                          id="description"
+   641→                          rows={5}
+   642→                          placeholder="Rooms, area size, materials, timeline…"
+   643→                          aria-invalid={!!errors.description}
+   644→                          {...register("description")}
+   645→                        />
+   646→                        {errors.description && (
+   647→                          <p className="text-xs text-[#B3261E]">
+   648→                            {errors.description.message}
+   649→                          </p>
+   650→                        )}
+   651→                      </div>
+   652→                    </div>
+   653→                  )}
+   654→
+   655→                  {/* Step 3 — Upload Photos */}
+   656→                  {step === 2 && (
+   657→                    <div className="space-y-4">
+   658→                      <div
+   659→                        {...getRootProps()}
+   660→                        className={cn(
+   661→                          "relative rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors duration-300",
+   662→                          isDragActive
+   663→                            ? "border-[#B8894F] bg-[#B8894F]/6"
+   664→                            : "border-[#E8E4DE] bg-[#FAF8F5]/40 hover:border-[#B8894F]/60",
+   665→                        )}
+   666→                      >
+   667→                        <input {...getInputProps()} />
+   668→                        <motion.div
+   669→                          animate={
+   670→                            isDragActive
+   671→                              ? { scale: 1.08, y: -2 }
+   672→                              : { scale: 1, y: 0 }
+   673→                          }
+   674→                          transition={{
+   675→                            duration: 0.3,
+   676→                            ease: [0.22, 1, 0.36, 1],
+   677→                          }}
+   678→                          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#B8894F]/10 text-[#B8894F]"
+   679→                        >
+   680→                          <UploadCloud className="h-7 w-7" />
+   681→                        </motion.div>
+   682→                        <p className="mt-4 font-serif text-lg text-[#2B2B2B]">
+   683→                          {isDragActive
+   684→                            ? "Drop your photos here…"
+   685→                            : "Drag & drop photos here"}
+   686→                        </p>
+   687→                        <p className="mt-1 text-sm text-[#6B6258]">
+   688→                          or{" "}
+   689→                          <button
+   690→                            type="button"
+   691→                            onClick={openDialog}
+   692→                            className="link-underline font-medium text-[#B8894F]"
+   693→                          >
+   694→                            browse files
+   695→                          </button>{" "}
+   696→                          from your device
+   697→                        </p>
+   698→                        <p className="mt-4 text-xs text-[#6B6258]/80">
+   699→                          JPG, PNG, HEIC or WEBP — up to 5 images, 10MB each.
+   700→                        </p>
+   701→                      </div>
+   702→
+   703→                      {errors.images && (
+   704→                        <p className="text-xs text-[#B3261E]">
+   705→                          {errors.images.message as string}
+   706→                        </p>
+   707→                      )}
+   708→
+   709→                      {images.length > 0 && (
+   710→                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+   711→                          <AnimatePresence>
+   712→                            {images.map((img) => (
+   713→                              <motion.div
+   714→                                key={img.id}
+   715→                                layout
+   716→                                initial={{ opacity: 0, scale: 0.92 }}
+   717→                                animate={{
+   718→                                  opacity: 1,
+   719→                                  scale: img.progress >= 100 ? 1 : 0.96,
+   720→                                }}
+   721→                                exit={{ opacity: 0, scale: 0.92 }}
+   722→                                transition={{
+   723→                                  duration: 0.35,
+   724→                                  ease: [0.22, 1, 0.36, 1],
+   725→                                }}
+   726→                                className="group relative aspect-square overflow-hidden rounded-xl border border-[#E8E4DE] bg-[#F2EFE9]"
+   727→                              >
+   728→                                <img
+   729→                                  src={img.preview}
+   730→                                  alt={img.file.name}
+   731→                                  className="h-full w-full object-cover"
+   732→                                />
+   733→                                {/* progress overlay */}
+   734→                                {img.progress < 100 && (
+   735→                                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/35 backdrop-blur-[2px]">
+   736→                                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+   737→                                    <div className="h-1 w-3/4 overflow-hidden rounded-full bg-white/30">
+   738→                                      <motion.div
+   739→                                        className="h-full bg-white"
+   740→                                        animate={{ width: `${img.progress}%` }}
+   741→                                        transition={{ duration: 0.2 }}
+   742→                                      />
+   743→                                    </div>
+   744→                                  </div>
+   745→                                )}
+   746→                                {/* remove button */}
+   747→                                <button
+   748→                                  type="button"
+   749→                                  onClick={() => removeImage(img.id)}
+   750→                                  className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/85 text-[#2B2B2B] opacity-0 shadow-sm transition-opacity duration-200 hover:bg-white group-hover:opacity-100"
+   751→                                  aria-label={`Remove ${img.file.name}`}
+   752→                                >
+   753→                                  <X className="h-3.5 w-3.5" />
+   754→                                </button>
+   755→                              </motion.div>
+   756→                            ))}
+   757→                          </AnimatePresence>
+   758→
+   759→                          {images.length < MAX_IMAGES && (
+   760→                            <button
+   761→                              type="button"
+   762→                              onClick={openDialog}
+   763→                              className="flex aspect-square items-center justify-center rounded-xl border border-dashed border-[#E8E4DE] text-[#6B6258] transition-colors hover:border-[#B8894F]/60 hover:text-[#B8894F]"
+   764→                              aria-label="Add more photos"
+   765→                            >
+   766→                              <ImagePlus className="h-6 w-6" />
+   767→                            </button>
+   768→                          )}
+   769→                        </div>
+   770→                      )}
+   771→                    </div>
+   772→                  )}
+   773→
+   774→                  {/* Step 4 — Review */}
+   775→                  {step === 3 && (
+   776→                    <div className="space-y-5">
+   777→                      {/* Contact */}
+   778→                      <ReviewGroup
+   779→                        title="Contact"
+   780→                        onEdit={() => jumpToStep(0)}
+   781→                      >
+   782→                        <ReviewRow label="Name" value={watched.fullName} />
+   783→                        <ReviewRow label="Email" value={watched.email} />
+   784→                        <ReviewRow
+   785→                          label="Phone"
+   786→                          value={watched.phone || "—"}
+   787→                        />
+   788→                        <ReviewRow
+   789→                          label="Contact time"
+   790→                          value={watched.contactTime ?? "Anytime"}
+   791→                        />
+   792→                      </ReviewGroup>
+   793→
+   794→                      {/* Project */}
+   795→                      <ReviewGroup
+   796→                        title="Project"
+   797→                        onEdit={() => jumpToStep(1)}
+   798→                      >
+   799→                        <ReviewRow
+   800→                          label="Service"
+   801→                          value={watched.serviceType}
+   802→                        />
+   803→                        <ReviewRow
+   804→                          label="Location"
+   805→                          value={watched.location || "—"}
+   806→                        />
+   807→                        <ReviewRow
+   808→                          label="Description"
+   809→                          value={watched.description}
+   810→                          multiline
+   811→                        />
+   812→                      </ReviewGroup>
+   813→
+   814→                      {/* Photos */}
+   815→                      <ReviewGroup
+   816→                        title={`Photos (${images.length})`}
+   817→                        onEdit={() => jumpToStep(2)}
+   818→                      >
+   819→                        {images.length === 0 ? (
+   820→                          <p className="text-sm text-[#6B6258]">No photos.</p>
+   821→                        ) : (
+   822→                          <div className="flex flex-wrap gap-2">
+   823→                            {images.map((img) => (
+   824→                              <div
+   825→                                key={img.id}
+   826→                                className="relative h-16 w-16 overflow-hidden rounded-lg border border-[#E8E4DE] bg-[#F2EFE9]"
+   827→                              >
+   828→                                <img
+   829→                                  src={img.preview}
+   830→                                  alt={img.file.name}
+   831→                                  className="h-full w-full object-cover"
+   832→                                />
+   833→                              </div>
+   834→                            ))}
+   835→                          </div>
+   836→                        )}
+   837→                      </ReviewGroup>
+   838→
+   839→                      <p className="rounded-xl bg-[#FAF8F5] p-3 text-xs leading-relaxed text-[#6B6258]">
+   840→                        By sending this request you agree to be contacted by
+   841→                        Maison Studio about your project. Your photos are used
+   842→                        only to prepare your quote.
+   843→                      </p>
+   844→                    </div>
+   845→                  )}
+   846→                </motion.div>
+   847→              </AnimatePresence>
+   848→
+   849→              {/* Nav buttons */}
+   850→              <div className="flex items-center justify-between gap-3 pt-2">
+   851→                {step > 0 && !submitted ? (
+   852→                  <button
+   853→                    type="button"
+   854→                    onClick={handleBack}
+   855→                    className="btn-outline-bronze inline-flex items-center gap-2 text-sm disabled:opacity-50"
+   856→                    disabled={submitting || showCheck}
+   857→                  >
+   858→                    <ArrowLeft className="h-4 w-4" />
+   859→                    Back
+   860→                  </button>
+   861→                ) : (
+   862→                  <span aria-hidden />
+   863→                )}
+   864→
+   865→                {step < STEPS.length - 1 ? (
+   866→                  <button
+   867→                    type="button"
+   868→                    onClick={handleContinue}
+   869→                    className="btn-bronze inline-flex items-center gap-2 text-sm"
+   870→                  >
+   871→                    Continue
+   872→                    <ArrowLeft className="h-4 w-4 rotate-180" />
+   873→                  </button>
+   874→                ) : (
+   875→                  <button
+   876→                    type="submit"
+   877→                    disabled={submitting || showCheck}
+   878→                    className="btn-bronze inline-flex min-w-44 items-center justify-center gap-2 text-sm disabled:cursor-not-allowed"
+   879→                  >
+   880→                    <AnimatePresence mode="wait" initial={false}>
+   881→                      {submitting ? (
+   882→                        <motion.span
+   883→                          key="loading"
+   884→                          initial={{ opacity: 0, scale: 0.9 }}
+   885→                          animate={{ opacity: 1, scale: 1 }}
+   886→                          exit={{ opacity: 0, scale: 0.9 }}
+   887→                          transition={{ duration: 0.2 }}
+   888→                          className="inline-flex items-center gap-2"
+   889→                        >
+   890→                          <Loader2 className="h-4 w-4 animate-spin" />
+   891→                          Sending…
+   892→                        </motion.span>
+   893→                      ) : showCheck ? (
+   894→                        <motion.span
+   895→                          key="check"
+   896→                          initial={{ opacity: 0, scale: 0.6 }}
+   897→                          animate={{ opacity: 1, scale: 1 }}
+   898→                          exit={{ opacity: 0, scale: 0.6 }}
+   899→                          transition={{
+   900→                            duration: 0.35,
+   901→                            ease: [0.22, 1, 0.36, 1],
+   902→                          }}
+   903→                          className="inline-flex items-center gap-2 text-emerald-50"
+   904→                        >
+   905→                          <CheckCircle2 className="h-5 w-5 text-emerald-200" />
+   906→                          Sent
+   907→                        </motion.span>
+   908→                      ) : (
+   909→                        <motion.span
+   910→                          key="text"
+   911→                          initial={{ opacity: 0 }}
+   912→                          animate={{ opacity: 1 }}
+   913→                          exit={{ opacity: 0 }}
+   914→                          transition={{ duration: 0.15 }}
+   915→                          className="inline-flex items-center gap-2"
+   916→                        >
+   917→                          Send My Request
+   918→                          <ArrowLeft className="h-4 w-4 rotate-180" />
+   919→                        </motion.span>
+   920→                      )}
+   921→                    </AnimatePresence>
+   922→                  </button>
+   923→                )}
+   924→              </div>
+   925→            </form>
+   926→          </motion.div>
+   927→        )}
+   928→      </AnimatePresence>
+   929→    </div>
+   930→  );
+   931→
+   932→  if (compact) {
+   933→    return (
+   934→      <div className="w-full">
+   935→        {headerBlock}
+   936→        {formContent}
+   937→      </div>
+   938→    );
+   939→  }
+   940→
+   941→  return (
+   942→    <section
+   943→      id="quote"
+   944→      className="scroll-mt-24 bg-[#FAF8F5] px-5 py-20 sm:px-8 md:py-28"
+   945→    >
+   946→      <div className="mx-auto max-w-3xl">
+   947→        <Reveal>{headerBlock}</Reveal>
+   948→        <Reveal delay={0.05}>{formContent}</Reveal>
+   949→      </div>
+   950→    </section>
+   951→  );
+   952→}
+   953→
+   954→/* ---------- Small helpers ---------- */
+   955→
+   956→function ReviewGroup({
+   957→  title,
+   958→  onEdit,
+   959→  children,
+   960→}: {
+   961→  title: string;
+   962→  onEdit: () => void;
+   963→  children: React.ReactNode;
+   964→}) {
+   965→  return (
+   966→    <div className="rounded-2xl border border-[#E8E4DE] bg-[#FAF8F5]/60 p-4">
+   967→      <div className="mb-3 flex items-center justify-between">
+   968→        <h4 className="font-serif text-sm uppercase tracking-[0.18em] text-[#2B2B2B]">
+   969→          {title}
+   970→        </h4>
+   971→        <button
+   972→          type="button"
+   973→          onClick={onEdit}
+   974→          className="inline-flex items-center gap-1 text-xs font-medium text-[#B8894F] hover:underline"
+   975→        >
+   976→          <Pencil className="h-3 w-3" />
+   977→          Edit
+   978→        </button>
+   979→      </div>
+   980→      <dl className="space-y-2">{children}</dl>
+   981→    </div>
+   982→  );
+   983→}
+   984→
+   985→function ReviewRow({
+   986→  label,
+   987→  value,
+   988→  multiline,
+   989→}: {
+   990→  label: string;
+   991→  value: string | undefined;
+   992→  multiline?: boolean;
+   993→}) {
+   994→  const display = value && value.length > 0 ? value : "—";
+   995→  return (
+   996→    <div
+   997→      className={cn(
+   998→        "flex gap-3",
+   999→        multiline ? "flex-col" : "flex-row items-baseline",
+  1000→      )}
+  1001→    >
+  1002→      <dt
+  1003→        className={cn(
+  1004→          "text-[11px] uppercase tracking-[0.18em] text-[#6B6258]/80",
+  1005→          multiline ? "" : "w-28 shrink-0",
+  1006→        )}
+  1007→      >
+  1008→        {label}
+  1009→      </dt>
+  1010→      <dd
+  1011→        className={cn(
+  1012→          "text-sm text-[#2B2B2B]",
+  1013→          multiline && "max-h-32 overflow-y-auto whitespace-pre-wrap break-words",
+  1014→        )}
+  1015→      >
+  1016→        {display}
+  1017→      </dd>
+  1018→    </div>
+  1019→  );
+  1020→}
+  1021→

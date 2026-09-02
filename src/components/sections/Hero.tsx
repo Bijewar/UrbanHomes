@@ -72,19 +72,20 @@ export default function Hero() {
           staggerChildren={0.14}
         >
           <StaggerItem>
-            <span className="smallcaps-label">Civil Engineering · Architecture · Finishing</span>
+            <span className="smallcaps-label">Construction · Interior · Painting</span>
           </StaggerItem>
 
           <StaggerItem className="mt-6 w-full">
             <h1 className="text-balance font-serif text-4xl font-semibold leading-[1.05] text-[#2B2B2B] sm:text-5xl md:text-6xl lg:text-7xl">
-              Building Spaces That Inspire, Designed With Precision.
+              Planning, Designing &amp; Execution — for spaces that feel considered.
             </h1>
           </StaggerItem>
 
           <StaggerItem className="mt-6 w-full">
             <p className="mx-auto max-w-2xl text-base font-light leading-relaxed text-[#6B6258] sm:text-lg md:text-xl">
-              Civil Engineering, Architecture &amp; Finishing Solutions —
-              crafted end-to-end by one accountable team.
+              Residential and commercial work, end-to-end. Construction,
+              interiors, modular kitchens, custom furniture, false ceiling,
+              painting &amp; finishing — by one accountable team.
             </p>
           </StaggerItem>
 

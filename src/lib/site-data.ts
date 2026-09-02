@@ -1,11 +1,17 @@
 import {
-  Ruler,
-  Compass,
+  HardHat,
+  Sofa,
+  ChefHat,
+  Armchair,
+  Layers,
   PaintBucket,
+  ToyBrick,
+  Brush,
   ClipboardCheck,
   PencilRuler,
-  HardHat,
+  Hammer,
   KeyRound,
+  type LucideIcon,
 } from "lucide-react";
 
 export type ServiceItem = {
@@ -15,57 +21,137 @@ export type ServiceItem = {
   description: string;
   features: string[];
   image: string;
-  icon: any;
+  icon: LucideIcon;
 };
 
+/**
+ * Urban Homes — eight service pillars.
+ * The studio covers planning, designing and execution for both
+ * residential and commercial projects.
+ */
 export const SERVICES: ServiceItem[] = [
   {
-    id: "civil",
-    title: "Civil Engineering",
-    short: "Structures that stand the test of time.",
+    id: "construction",
+    title: "Construction & Renovation",
+    short: "Built right, from the ground up.",
     description:
-      "From foundations to finishing details, our civil engineers blend structural integrity with elegant problem-solving — engineered to perform and built to last.",
+      "New construction, full home renovations and interior-exterior structural work — delivered by an in-house team that owns the drawings and the site. We plan, we engineer, and we execute under one accountable roof.",
     features: [
-      "Structural design & analysis",
-      "Foundation & footing solutions",
-      "Site supervision & QA/QC",
-      "RCC, steel & retrofitting",
+      "New Construction",
+      "Home Renovation",
+      "Interior & Exterior Work",
     ],
     image:
       "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80",
-    icon: Ruler,
+    icon: HardHat,
   },
   {
-    id: "architecture",
-    title: "Architecture & Design",
-    short: "Spaces designed with intention.",
+    id: "interior",
+    title: "Interior Design",
+    short: "Spaces planned around the way you live.",
     description:
-      "We design architecture that breathes — light, proportion, material and movement considered together. Every drawing is a promise of a space that feels right.",
+      "Complete home interiors designed and built with intention. From space planning to custom interior solutions, every decision serves a purpose and every material earns its place in the room.",
     features: [
-      "Concept & schematic design",
-      "3D renders & walkthroughs",
-      "Working drawings & BOQ",
-      "Interior & landscape design",
+      "Complete Home Interiors",
+      "Space Planning",
+      "Custom Interior Solutions",
     ],
     image:
       "https://images.unsplash.com/photo-1503174971373-b1f69850bded?auto=format&fit=crop&w=1200&q=80",
-    icon: Compass,
+    icon: Sofa,
+  },
+  {
+    id: "kitchen",
+    title: "Modular Kitchen",
+    short: "Kitchens that work as hard as you do.",
+    description:
+      "Modular kitchens designed for your cooking flow, your storage habits and your light. We handle the design, the civil prep, the modules and the final install — so the joins are honest and the finishes last.",
+    features: [
+      "Modular Kitchens",
+      "Custom Kitchen Design",
+      "Installation",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1200&q=80",
+    icon: ChefHat,
+  },
+  {
+    id: "furniture",
+    title: "Custom Furniture",
+    short: "Made-to-measure, finished by hand.",
+    description:
+      "Bespoke furniture built in-house for rooms that need a specific proportion or a specific soul. Made-to-measure pieces with hand-finished surfaces that age well and stay honest.",
+    features: [
+      "Custom Furniture",
+      "Made-to-Measure Furniture",
+      "Furniture Finishing",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=1200&q=80",
+    icon: Armchair,
+  },
+  {
+    id: "false-ceiling",
+    title: "False Ceiling & Wall Design",
+    short: "The fifth façade of a room.",
+    description:
+      "False ceilings, 3D special-effect textures, rustic finishes and PVC wall panels — engineered for light, proportion and acoustic comfort. Statement surfaces that don't shout.",
+    features: [
+      "False Ceiling",
+      "3D Special Effect Texture",
+      "Rustic Finishes",
+      "PVC Wall Panels",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1583845112203-29329902332e?auto=format&fit=crop&w=1200&q=80",
+    icon: Layers,
   },
   {
     id: "painting",
     title: "Painting & Finishing",
     short: "The last 10% that defines 100% of the impression.",
     description:
-      "Surface preparation, premium materials, and craftsmen who care. Our finishing work turns walls into experiences — smooth, durable, beautiful.",
+      "Interior and exterior painting with premium PU paints and polishes, plus texture finishes that hold up to the climate. Surface preparation is where we spend most of our time — the coats themselves are the easy part.",
     features: [
-      "Interior & exterior painting",
-      "Texture, stencil & accent walls",
-      "Waterproofing & sealants",
-      "Polish, veneer & surface treatment",
+      "Interior & Exterior Painting",
+      "PU Paint",
+      "PU Polish",
+      "Texture Finishes",
     ],
     image:
-      "https://images.unsplash.com/photo-1589939805396-29842a929af0?auto=format&fit=crop&w=1200&q=80",
+      "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/3afa01c96218.jpg",
     icon: PaintBucket,
+  },
+  {
+    id: "wall-surface",
+    title: "Wall & Surface Solutions",
+    short: "Walls that perform, not just look the part.",
+    description:
+      "Waterproofing, customised wallpapers, roller blinds and full wall treatments — practical layers that protect the building and personality layers that make a room feel like yours.",
+    features: [
+      "Waterproofing",
+      "Customized Wallpapers",
+      "Roller Blinds",
+      "Wall Treatments",
+    ],
+    image:
+      "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/641f1665baa5.jpg",
+    icon: ToyBrick,
+  },
+  {
+    id: "art",
+    title: "Art & Custom Work",
+    short: "Bespoke finishes, signed by hand.",
+    description:
+      "Mural art, bespoke design pieces and other custom interior work — made by hand, in-house, for clients who want a room no one else has. The kind of detail that turns a finished space into a story.",
+    features: [
+      "Mural Art",
+      "Bespoke Designs",
+      "Other Custom Interior Works",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80",
+    icon: Brush,
   },
 ];
 
@@ -135,7 +221,7 @@ export const PORTFOLIO: PortfolioItem[] = [
     category: "Interior",
     location: "Hyderabad, IN",
     image:
-      "https://images.unsplash.com/photo-1631048500301-7e85ed6c6c5a?auto=format&fit=crop&w=1000&q=80",
+      "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/741e61521797.jpg",
   },
   {
     id: "p8",
@@ -143,7 +229,7 @@ export const PORTFOLIO: PortfolioItem[] = [
     category: "Painting",
     location: "Kolkata, IN",
     image:
-      "https://images.unsplash.com/photo-1600566753190-17f0ba5a8b94?auto=format&fit=crop&w=1000&q=80",
+      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1000&q=80",
   },
 ];
 
@@ -151,7 +237,7 @@ export type ProcessStep = {
   id: number;
   title: string;
   description: string;
-  icon: any;
+  icon: LucideIcon;
 };
 
 export const PROCESS: ProcessStep[] = [
@@ -159,22 +245,22 @@ export const PROCESS: ProcessStep[] = [
     id: 1,
     title: "Consultation",
     description:
-      "We listen first — your vision, site, budget and timeline. A no-obligation conversation that becomes the brief for everything that follows.",
+      "We listen first — your vision, site, budget and timeline. A no-obligation conversation (on WhatsApp, on call, or on site) that becomes the brief for everything that follows.",
     icon: ClipboardCheck,
   },
   {
     id: 2,
     title: "Design",
     description:
-      "Concepts, drawings, 3D walkthroughs and material palettes — refined together until every detail feels inevitable.",
+      "Concepts, drawings, 3D walkthroughs and material palettes — refined together until every detail feels inevitable and the budget is honest from day one.",
     icon: PencilRuler,
   },
   {
     id: 3,
     title: "Execution",
     description:
-      "Our in-house engineers and craftsmen bring the drawings to life under dedicated site supervision and weekly quality reviews.",
-    icon: HardHat,
+      "Our in-house engineers and craftsmen bring the drawings to life under dedicated site supervision and weekly quality reviews — no sub-contracted quality.",
+    icon: Hammer,
   },
   {
     id: 4,
@@ -208,7 +294,7 @@ export const TESTIMONIALS: Testimonial[] = [
     name: "Rohan Kapoor",
     role: "Director · Kapoor Interiors",
     quote:
-      "We've worked with many contractors. Maison Studio is the first that delivers design intent and engineering reality in the same conversation. A genuine design-build partner.",
+      "We've worked with many contractors. Urban Homes is the first that delivers design intent and engineering reality in the same conversation. A genuine design-build partner.",
     avatar:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
   },
@@ -219,7 +305,7 @@ export const TESTIMONIALS: Testimonial[] = [
     quote:
       "Their finishing crew is rare — they actually understand architecture. The surfaces are clean, the joints are honest, and the timeline was respected to the day.",
     avatar:
-      "https://images.unsplash.com/photo-1580489944761-4a1efc8c1d6a?auto=format&fit=crop&w=200&q=80",
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
   },
   {
     id: "t4",

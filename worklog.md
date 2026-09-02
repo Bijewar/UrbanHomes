@@ -212,3 +212,63 @@ Stage Summary:
 - Site is fully runnable on http://localhost:3000
 - All Part A (design/aesthetic) and Part B (quote feature) requirements delivered
 - Lint clean, no runtime errors, all interactions browser-verified
+
+---
+Task ID: E
+Agent: main
+Task: Rebrand to Urban Homes, fix broken images + button color, replace email quote flow with WhatsApp + Cloudinary flow.
+
+Work Log:
+- Investigated current state via Agent Browser + curl. Found 5 broken Unsplash image URLs (HTTP 404) and a Get a Quote button color bug.
+- Root cause of color bug: `.btn-bronze` referenced `var(--bronze)` and `var(--charcoal)`, but Tailwind 4 `@theme inline` only exposes them as `--color-bronze` etc., not `--bronze`. Added direct `--bronze`, `--ivory`, `--stone`, `--taupe`, `--charcoal`, `--terracotta`, `--bronze-soft`, `--warm-white` aliases to `:root` and `.dark` in globals.css. Also added `!important` to `.btn-bronze` and `.btn-outline-bronze` so they always beat shadcn Button base styles.
+- Added new `.btn-whatsapp` utility class (WhatsApp green `#1FA654` with hover `#178a46`) for the final submit button.
+- Changed `.quote-pulse` keyframe color to WhatsApp green for the floating button.
+- Rebranded every "Maison Studio" → "Urban Homes" across layout.tsx, Navbar, Hero, About, Contact, Footer.
+- Updated layout metadata title/description/keywords to reflect Urban Homes.
+- Replaced 5 broken Unsplash URLs with working alternatives: 
+  * 3 replaced via ZAI image-search (z-cdn.chatglm.cn hosted — painting after, wall surface solutions card, studio apartment portfolio item)
+  * Painting service card image replaced with another z-cdn image
+- Rebuilt `src/lib/site-data.ts` with 8 Urban Homes service categories (Construction & Renovation, Interior Design, Modular Kitchen, Custom Furniture, False Ceiling & Wall Design, Painting & Finishing, Wall & Surface Solutions, Art & Custom Work) — each with its sub-services as features, lucide icons (HardHat, Sofa, ChefHat, Armchair, Layers, PaintBucket, ToyBrick, Brush), and working image URLs.
+- Rebuilt Services section to render all 8 cards in a 4-column grid (4×2 layout on desktop).
+- Updated Hero smallcaps to "Construction · Interior · Painting" and headline to "Planning, Designing & Execution — for spaces that feel considered."
+- Updated Footer SERVICE_LINKS to list all 8 services.
+- Created `src/lib/cloudinary.ts` with: `isCloudinaryConfigured`, `compressImage` (client-side resize to 1600px + JPEG q0.82), `uploadToCloudinary` (XHR with progress events), `buildWhatsAppMessage`, `buildWhatsAppUrl`.
+- Rewrote `QuoteForm.tsx` as WhatsApp-based flow:
+  * 3 steps: Contact → Project → Photos
+  * react-hook-form + zod validation
+  * react-dropzone for JPG/PNG/HEIC/WEBP (max 5×10MB)
+  * Per-image upload progress bar + retry button on failure
+  * Honeypot field
+  * Submit morphs to "Send Quote via WhatsApp" green button (`.btn-whatsapp`)
+  * Builds wa.me URL with pre-filled message containing Name, Service, Description, Phone, and Cloudinary image links
+  * Opens wa.me in new tab via `window.open(..., '_blank, noopener')`
+  * Success state with green checkmark + "Open WhatsApp" button + "Send another request" link
+- Updated FloatingQuoteButton to use WhatsApp SVG icon (custom inline SVG since lucide doesn't ship a WhatsApp glyph) + WhatsApp green `#1FA654` background + green pulse.
+- Updated Contact section: phone numbers `+91 93438 15319` and `+91 93031 99175`, added WhatsApp quick button + WhatsApp detail block, kept Google Maps embed.
+- Updated Footer: new phone numbers, WhatsApp link, "© 2026 Urban Homes" copyright, list of all 8 services.
+- Added NEXT_PUBLIC env vars in `.env`: WHATSAPP_NUMBER=919343815319, WHATSAPP_NUMBER_ALT=919303199175, CLOUDINARY_CLOUD_NAME=urban-homes (placeholder), CLOUDINARY_UPLOAD_PRESET=urban-homes-quotes (placeholder).
+- Removed `src/app/api/quote/route.ts` (email API route) since the WhatsApp flow is fully client-side.
+- Wrapped `<QuoteForm />` in `page.tsx` with `<section id="quote" className="scroll-mt-24 divider-stone px-5 py-20 ...">` so the FloatingQuoteButton's IntersectionObserver (which targets `#quote`) still works.
+
+Verification:
+- `bun run lint` → 0 errors, 1 harmless React Compiler warning about react-hook-form `watch()`.
+- Agent Browser confirmed:
+  * Page title is "Urban Homes — Construction · Interior · Modular Kitchen · Painting"
+  * Navbar "Get a Quote" button is now solid bronze/gold with white text (VLM verified)
+  * Hero "Get a Free Quote" button is solid bronze/gold (VLM verified)
+  * All images load (verified after scroll — no broken images)
+  * Services section renders 4×2 grid of 8 service cards (VLM verified)
+  * Quote form step 1 → step 2 advances correctly with all 9 service options in dropdown
+  * Step 3 has drag/drop + "Browse files" + upload progress (VLM verified)
+  * Failed upload → "Failed" thumbnail + Retry button + error toast (graceful failure when Cloudinary placeholder creds are used)
+  * Contact section shows both phone numbers + WhatsApp green chat button (VLM verified)
+  * Footer lists all 8 services + both phone numbers + WhatsApp link + "© 2026 Urban Homes" (VLM verified)
+  * Floating button (bottom-right) is WhatsApp-green with WhatsApp icon, opens right Sheet titled "Request a quote on WhatsApp"
+
+Stage Summary:
+- Site is fully rebranded as Urban Homes with the 8-service catalog
+- All 5 broken images fixed (3 via ZAI-hosted search results, 2 swapped with working Unsplash URLs)
+- Get a Free Quote button color issue fixed (added direct CSS var aliases + `!important` overrides)
+- Email-based quote flow replaced end-to-end with WhatsApp + Cloudinary flow (multi-step form, drag-drop upload, wa.me redirect, success state)
+- Floating button now uses WhatsApp green + WhatsApp icon
+- For production: user must add real Cloudinary creds to `.env` (NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME + NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) — currently using placeholders that fail uploads gracefully

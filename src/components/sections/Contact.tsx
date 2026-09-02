@@ -8,6 +8,7 @@ import {
   Linkedin,
   Mail,
   MapPin,
+  MessageCircle,
   Phone,
   Twitter,
 } from "lucide-react";
@@ -26,6 +27,11 @@ type FormState = {
 type Errors = Partial<Record<keyof FormState, string>>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const WHATSAPP_NUMBER = process.env
+  .NEXT_PUBLIC_WHATSAPP_NUMBER ?? "919343815319";
+const WHATSAPP_NUMBER_ALT = process.env
+  .NEXT_PUBLIC_WHATSAPP_NUMBER_ALT ?? "919303199175";
 
 const SOCIALS = [
   { Icon: Instagram, label: "Instagram", href: "#" },
@@ -50,7 +56,7 @@ export default function Contact() {
     if (!form.email.trim()) {
       e.email = "We need an email to reply.";
     } else if (!EMAIL_RE.test(form.email.trim())) {
-      e.email = "That email doesn’t look right.";
+      e.email = "That email doesn't look right.";
     }
     if (!form.message.trim() || form.message.trim().length < 10) {
       e.message = "A sentence or two about your project, please.";
@@ -72,7 +78,7 @@ export default function Contact() {
       toast({
         title: "Message sent",
         description:
-          "Thank you — a member of our studio will be in touch within one working day.",
+          "Thank you — a member of our team will be in touch within one working day.",
       });
     }, 700);
   };
@@ -95,8 +101,8 @@ export default function Contact() {
           <div className="hairline mx-auto my-6 w-24" />
           <p className="text-base leading-relaxed text-[#6B6258] md:text-lg">
             Send us a few lines about your site, timeline and what you&rsquo;re
-            hoping to achieve. We reply to every message personally — usually
-            within one working day.
+            hoping to achieve — or jump straight to WhatsApp for an instant
+            conversation with our team.
           </p>
         </Reveal>
 
@@ -185,7 +191,7 @@ export default function Contact() {
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="btn-bronze h-11 w-full border-0 bg-[#B8894F] text-white hover:bg-[#a4763e] disabled:opacity-60"
+                  className="btn-bronze h-11 w-full border-0"
                 >
                   {submitting ? "Sending…" : "Send message"}
                 </Button>
@@ -205,17 +211,23 @@ export default function Contact() {
               <DetailItem
                 Icon={MapPin}
                 title="Studio"
-                lines={["14 Atelier Lane", "Connaught Place, New Delhi"]}
+                lines={["Urban Homes", "By appointment · Pan-India"]}
               />
               <DetailItem
                 Icon={Phone}
                 title="Phone"
-                lines={["+91 98100 12345", "Mon–Sat, 10am–7pm"]}
+                lines={[
+                  formatPhone(WHATSAPP_NUMBER),
+                  formatPhone(WHATSAPP_NUMBER_ALT),
+                ]}
               />
               <DetailItem
-                Icon={Mail}
-                title="Email"
-                lines={["hello@maisonstudio.in", "projects@maisonstudio.in"]}
+                Icon={MessageCircle}
+                title="WhatsApp"
+                lines={[
+                  formatPhone(WHATSAPP_NUMBER),
+                  "Mon–Sat, 10am–7pm",
+                ]}
               />
               <DetailItem
                 Icon={Clock}
@@ -227,7 +239,7 @@ export default function Contact() {
             {/* Map embed */}
             <div className="overflow-hidden rounded-2xl border border-[#E8E4DE]">
               <iframe
-                title="Maison Studio location map"
+                title="Urban Homes service area map"
                 src="https://maps.google.com/maps?q=Connaught%20Place%20New%20Delhi&t=&z=14&ie=UTF8&iwloc=&output=embed"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -235,6 +247,19 @@ export default function Contact() {
                 style={{ border: 0 }}
               />
             </div>
+
+            {/* WhatsApp quick button */}
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                "Hi Urban Homes! I'd like to discuss a project.",
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-whatsapp w-full"
+            >
+              <MessageCircle className="h-5 w-5" />
+              Chat with us on WhatsApp
+            </a>
 
             {/* Socials */}
             <div className="flex items-center gap-3">
@@ -286,4 +311,12 @@ function DetailItem({
       </div>
     </div>
   );
+}
+
+/** Format a 12-digit international number like 919343815319 → +91 93438 15319 */
+function formatPhone(num: string): string {
+  if (num.length === 12 && num.startsWith("91")) {
+    return `+91 ${num.slice(2, 7)} ${num.slice(7)}`;
+  }
+  return num;
 }

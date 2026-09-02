@@ -11,9 +11,9 @@ import { PAINTING_PALETTE } from "@/lib/site-data";
 import { Reveal } from "@/components/motion/Reveal";
 
 const BEFORE_IMAGE =
-  "https://images.unsplash.com/photo-1582268611958-ebf16144aaa6?auto=format&fit=crop&w=1200&q=80";
+  "https://images.unsplash.com/photo-1583845112203-29329902332e?auto=format&fit=crop&w=1200&q=80";
 const AFTER_IMAGE =
-  "https://images.unsplash.com/photo-1589939805396-29842a929af0?auto=format&fit=crop&w=1200&q=80";
+  "https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/04d856b19b13.jpg";
 
 export default function Painting() {
   const [position, setPosition] = useState(50);

@@ -20,22 +20,22 @@ export default function Services() {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mx-auto max-w-3xl text-center">
-          <span className="smallcaps-label">Our Services</span>
+          <span className="smallcaps-label">What We Do</span>
           <h2 className="mt-4 font-serif text-3xl font-semibold leading-tight text-[#2B2B2B] sm:text-4xl md:text-[2.6rem]">
-            Three disciplines, one accountable team.
+            Eight disciplines, one accountable team.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[#6B6258] md:text-lg">
-            Civil engineering, architecture and finishing — held together by a
-            single studio so that nothing falls through the gaps between
-            drawing, structure and final surface.
+            Planning, designing and execution for residential and commercial
+            projects — held together by a single studio so that nothing falls
+            through the gaps between drawing, structure and final surface.
           </p>
           <div className="hairline mx-auto mt-8 max-w-24" aria-hidden />
         </div>
 
-        {/* Cards */}
+        {/* Cards — 4-column on desktop so the 8 services form a tidy 4×2 grid */}
         <Stagger
-          className="mt-14 grid gap-8 md:grid-cols-3 md:gap-7"
-          staggerChildren={0.15}
+          className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          staggerChildren={0.08}
         >
           {SERVICES.map((service) => (
             <StaggerItem key={service.id} className="h-full">
@@ -43,6 +43,21 @@ export default function Services() {
             </StaggerItem>
           ))}
         </Stagger>
+
+        {/* Bottom CTA strip */}
+        <div className="mt-14 text-center">
+          <a
+            href="#quote"
+            onClick={handleQuote}
+            className="btn-bronze"
+          >
+            Get a free quote
+          </a>
+          <p className="mt-4 text-sm text-[#6B6258]">
+            Not sure which service fits? Tell us about the project and
+            we&rsquo;ll route it to the right team.
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -57,45 +72,42 @@ function ServiceCard({
 }) {
   const Icon = service.icon;
   return (
-    <article className="card-lift flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8E4DE] bg-white">
+    <article className="card-lift group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8E4DE] bg-white">
       {/* Image */}
       <div className="img-zoom">
         <img
           src={service.image}
           alt={`${service.title} — ${service.short}`}
           loading="lazy"
-          className="h-56 w-full object-cover"
+          className="h-44 w-full object-cover"
         />
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col p-6 md:p-8">
+      <div className="flex flex-1 flex-col p-5 md:p-6">
         {/* Icon */}
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#E8E4DE]">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#E8E4DE]">
           <Icon className="h-5 w-5 text-[#B8894F]" strokeWidth={1.5} />
         </div>
 
-        <h3 className="mt-5 font-serif text-2xl font-semibold text-[#2B2B2B]">
+        <h3 className="mt-4 font-serif text-xl font-semibold text-[#2B2B2B]">
           {service.title}
         </h3>
-        <p className="mt-1 text-sm font-medium italic text-[#B8894F]">
+        <p className="mt-1 text-xs font-medium italic text-[#B8894F]">
           {service.short}
-        </p>
-        <p className="mt-4 text-sm leading-relaxed text-[#6B6258]">
-          {service.description}
         </p>
 
         {/* Hairline divider */}
-        <div className="hairline my-6" aria-hidden />
+        <div className="hairline my-4" aria-hidden />
 
         {/* Features */}
-        <ul className="flex-1 space-y-3">
+        <ul className="flex-1 space-y-2">
           {service.features.map((feature) => (
-            <li key={feature} className="flex items-start gap-3">
-              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#B8894F]/10">
-                <Check className="h-3 w-3 text-[#B8894F]" strokeWidth={2.5} />
+            <li key={feature} className="flex items-start gap-2.5">
+              <span className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-[#B8894F]/10">
+                <Check className="h-2.5 w-2.5 text-[#B8894F]" strokeWidth={2.5} />
               </span>
-              <span className="text-sm leading-snug text-[#2B2B2B]/85">
+              <span className="text-[13px] leading-snug text-[#2B2B2B]/85">
                 {feature}
               </span>
             </li>
@@ -106,10 +118,10 @@ function ServiceCard({
         <a
           href="#quote"
           onClick={onQuote}
-          className="link-underline group mt-7 inline-flex w-fit items-center gap-1.5 text-sm font-medium text-[#B8894F]"
+          className="link-underline group/cta mt-5 inline-flex w-fit items-center gap-1.5 text-xs font-medium text-[#B8894F]"
         >
           Request a quote
-          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+          <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover/cta:translate-x-1" />
         </a>
       </div>
     </article>

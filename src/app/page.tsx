@@ -25,7 +25,12 @@ export default function Home() {
         <Process />
         <Painting />
         <Testimonials />
-        <QuoteForm />
+        <section
+          id="quote"
+          className="scroll-mt-24 divider-stone px-5 py-20 sm:px-8 md:py-28"
+        >
+          <QuoteForm />
+        </section>
         <Contact />
       </main>
       <Footer />

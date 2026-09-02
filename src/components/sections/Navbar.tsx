@@ -57,14 +57,14 @@ export default function Navbar() {
           href="#top"
           onClick={(e) => handleNav(e, "#top")}
           className="flex items-center gap-3"
-          aria-label="Maison Studio home"
+          aria-label="Urban Homes home"
         >
           <span
             aria-hidden
             className="block h-6 w-6 border border-[#B8894F]"
           />
           <span className="font-serif text-lg font-semibold tracking-[0.18em] text-[#2B2B2B] sm:text-xl">
-            MAISON STUDIO
+            URBAN HOMES
           </span>
         </a>
 
@@ -117,7 +117,7 @@ export default function Navbar() {
                     className="block h-6 w-6 border border-[#B8894F]"
                   />
                   <span className="font-serif text-base font-semibold tracking-[0.18em] text-[#2B2B2B]">
-                    MAISON STUDIO
+                    URBAN HOMES
                   </span>
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function Navbar() {
                   </a>
                 </SheetClose>
                 <p className="mt-4 text-center text-xs tracking-wide text-[#6B6258]">
-                  Human-reviewed · Response within 24 hrs
+                  Real photos, real review · Reply on WhatsApp
                 </p>
               </div>
             </div>

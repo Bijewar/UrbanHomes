@@ -21,7 +21,7 @@ export default function About() {
             <div className="img-zoom relative overflow-hidden rounded-2xl shadow-sm">
               <img
                 src={MAIN_IMAGE}
-                alt="Maison Studio architects and engineers collaborating on-site"
+                alt="Urban Homes architects and engineers collaborating on-site"
                 loading="lazy"
                 className="aspect-[4/5] w-full object-cover sm:aspect-[5/4]"
               />
@@ -50,34 +50,35 @@ export default function About() {
           <div className="max-w-xl">
             <span className="smallcaps-label">About the Studio</span>
             <h2 className="mt-4 font-serif text-3xl font-semibold leading-tight text-[#2B2B2B] sm:text-4xl md:text-[2.5rem]">
-              A boutique studio for buildings that feel considered.
+              One team for planning, designing &amp; execution.
             </h2>
 
             <div className="mt-6 space-y-5 text-base leading-relaxed text-[#6B6258] md:text-[1.05rem]">
               <p>
-                Maison Studio was founded on a simple conviction: the best
-                buildings are made when the people who design them and the
-                people who build them are the same team. We bring civil
-                engineering, architecture and finishing under one roof so that
-                every line on a drawing has a clear, accountable pair of hands
-                behind it — and every wall we finish has the weight of real
-                intention.
+                Urban Homes was founded on a simple conviction: the best
+                spaces are made when the people who plan them, the people who
+                design them and the people who execute them are the same team.
+                We bring construction, interiors, modular kitchens, custom
+                furniture, false ceiling, painting and bespoke art work under
+                one roof — so that every line on a drawing has a clear,
+                accountable pair of hands behind it.
               </p>
               <p>
                 Our in-house craftsmen have spent years refining their trade,
                 which means we never sub-contract the parts of a project that
                 define its character. From structural calculations to the final
                 coat of paint, quality is owned by people you can speak to by
-                name. We work with a regional sensibility — reading light,
-                climate, material and context — so each space feels rooted in
-                where it stands rather than dropped onto it.
+                name. We work on both residential and commercial projects, and
+                we read light, climate, material and context so each space
+                feels rooted in where it stands.
               </p>
               <p>
-                The result is a practice that moves like a studio and ships like
-                a contractor: warm at the conversation, precise on the drawings,
-                and quiet on the site. We take on a limited number of projects
-                each year so that each one receives the attention it deserves
-                from the first sketch to the day we hand over the keys.
+                The result is a practice that moves like a studio and ships
+                like a contractor: warm at the conversation, precise on the
+                drawings, and quiet on the site. We take on a limited number
+                of projects each year so each one gets the attention it
+                deserves — from the first sketch to the day we hand over the
+                keys.
               </p>
             </div>
 

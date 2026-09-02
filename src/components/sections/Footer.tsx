@@ -1,7 +1,19 @@
 "use client";
 
-import { Facebook, Instagram, Linkedin, Mail, Phone, Twitter } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Linkedin,
+  MessageCircle,
+  Twitter,
+  Phone,
+} from "lucide-react";
 import { Reveal } from "@/components/motion/Reveal";
+
+const WHATSAPP_NUMBER = process.env
+  .NEXT_PUBLIC_WHATSAPP_NUMBER ?? "919343815319";
+const WHATSAPP_NUMBER_ALT = process.env
+  .NEXT_PUBLIC_WHATSAPP_NUMBER_ALT ?? "919303199175";
 
 const QUICK_LINKS = [
   { label: "About", href: "#about" },
@@ -12,9 +24,14 @@ const QUICK_LINKS = [
 ];
 
 const SERVICE_LINKS = [
-  { label: "Civil Engineering", href: "#services" },
-  { label: "Architecture & Design", href: "#services" },
+  { label: "Construction & Renovation", href: "#services" },
+  { label: "Interior Design", href: "#services" },
+  { label: "Modular Kitchen", href: "#services" },
+  { label: "Custom Furniture", href: "#services" },
+  { label: "False Ceiling & Wall Design", href: "#services" },
   { label: "Painting & Finishing", href: "#painting" },
+  { label: "Wall & Surface Solutions", href: "#services" },
+  { label: "Art & Custom Work", href: "#services" },
 ];
 
 const SOCIALS = [
@@ -24,6 +41,14 @@ const SOCIALS = [
   { Icon: Twitter, label: "Twitter", href: "#" },
 ];
 
+/** Format a 12-digit international number like 919343815319 → +91 93438 15319 */
+function formatPhone(num: string): string {
+  if (num.length === 12 && num.startsWith("91")) {
+    return `+91 ${num.slice(2, 7)} ${num.slice(7)}`;
+  }
+  return num;
+}
+
 export default function Footer() {
   return (
     <footer className="mt-auto border-t border-[#B8894F]/30 bg-[#F2EFE9]">
@@ -32,15 +57,17 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:pr-4">
             <h3 className="font-serif text-xl tracking-wide text-[#2B2B2B]">
-              MAISON STUDIO
+              URBAN HOMES
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-[#6B6258]">
-              Civil Engineering · Architecture · Finishing
+              Planning · Designing · Execution
+              <br />
+              Residential &amp; Commercial
             </p>
             <p className="mt-3 text-sm text-[#6B6258]">
-              14 Atelier Lane, Connaught Place,
+              By appointment
               <br />
-              New Delhi, IN
+              Pan-India projects
             </p>
           </div>
 
@@ -85,19 +112,30 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-[#B8894F]" />
                 <a
-                  href="tel:+919810012345"
+                  href={`tel:+${WHATSAPP_NUMBER}`}
                   className="link-underline transition-colors hover:text-[#B8894F]"
                 >
-                  +91 98100 12345
+                  {formatPhone(WHATSAPP_NUMBER)}
                 </a>
               </li>
               <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-[#B8894F]" />
+                <Phone className="h-4 w-4 text-[#B8894F]" />
                 <a
-                  href="mailto:hello@maisonstudio.in"
+                  href={`tel:+${WHATSAPP_NUMBER_ALT}`}
                   className="link-underline transition-colors hover:text-[#B8894F]"
                 >
-                  hello@maisonstudio.in
+                  {formatPhone(WHATSAPP_NUMBER_ALT)}
+                </a>
+              </li>
+              <li className="flex items-start gap-2">
+                <MessageCircle className="mt-0.5 h-4 w-4 text-[#1FA654]" />
+                <a
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-underline transition-colors hover:text-[#1FA654]"
+                >
+                  Chat on WhatsApp
                 </a>
               </li>
               <li className="text-[#6B6258]">
@@ -123,7 +161,7 @@ export default function Footer() {
 
         {/* Bottom strip */}
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-[#B8894F]/15 pt-6 text-xs text-[#6B6258] sm:flex-row">
-          <p>© 2026 Maison Studio. Crafted with care.</p>
+          <p>© 2026 Urban Homes. Crafted with care.</p>
           <p className="flex items-center gap-3">
             <span className="link-underline cursor-default">Privacy</span>
             <span aria-hidden>·</span>

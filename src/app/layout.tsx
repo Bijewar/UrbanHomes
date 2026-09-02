@@ -18,23 +18,28 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Maison Studio — Civil Engineering · Architecture · Finishing",
+  title: "Urban Homes — Construction · Interior · Modular Kitchen · Painting",
   description:
-    "Boutique design-build studio crafting civil engineering, architectural and painting & finishing solutions — end-to-end, with precision. Request a human-reviewed quote today.",
+    "Urban Homes is a planning, designing and execution studio for residential and commercial projects — construction & renovation, interior design, modular kitchens, custom furniture, false ceiling, painting & finishing, wall solutions and bespoke art work. Request a free quote on WhatsApp.",
   keywords: [
-    "civil engineering",
-    "architecture",
+    "construction",
+    "renovation",
+    "interior design",
+    "modular kitchen",
+    "custom furniture",
+    "false ceiling",
     "painting",
     "finishing",
-    "design-build",
-    "construction studio",
-    "boutique contractor",
+    "wall solutions",
+    "mural art",
+    "residential",
+    "commercial",
   ],
-  authors: [{ name: "Maison Studio" }],
+  authors: [{ name: "Urban Homes" }],
   openGraph: {
-    title: "Maison Studio — Civil Engineering · Architecture · Finishing",
+    title: "Urban Homes — Construction · Interior · Modular Kitchen · Painting",
     description:
-      "Civil Engineering, Architecture & Finishing Solutions — Crafted End-to-End.",
+      "Planning, Designing & Execution for Residential and Commercial projects. Get a free quote on WhatsApp.",
     type: "website",
   },
 };

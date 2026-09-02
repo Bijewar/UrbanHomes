@@ -88,6 +88,16 @@
   --sidebar-accent-foreground: #2B2B2B;
   --sidebar-border: #E8E4DE;
   --sidebar-ring: #B8894F;
+
+  /* Direct brand color aliases (used by utility classes like .btn-bronze) */
+  --bronze: #B8894F;
+  --ivory: #FAF8F5;
+  --warm-white: #FFFFFF;
+  --stone: #E8E4DE;
+  --taupe: #D8CFC2;
+  --charcoal: #2B2B2B;
+  --terracotta: #C1704D;
+  --bronze-soft: #D4B486;
 }
 
 .dark {
@@ -117,6 +127,16 @@
   --sidebar-accent-foreground: #FAF8F5;
   --sidebar-border: #3a3530;
   --sidebar-ring: #D4B486;
+
+  /* Direct brand color aliases for dark mode (kept consistent) */
+  --bronze: #D4B486;
+  --ivory: #FAF8F5;
+  --warm-white: #FFFFFF;
+  --stone: #3a3530;
+  --taupe: #4a3f33;
+  --charcoal: #FAF8F5;
+  --terracotta: #C1704D;
+  --bronze-soft: #D4B486;
 }
 
 @layer base {
@@ -200,45 +220,94 @@
   transform: scale(1.06);
 }
 
-/* Premium button */
+/* Premium button — important so it overrides shadcn Button base bg/color */
 .btn-bronze {
-  background: var(--bronze);
-  color: #fff;
-  border-radius: 999px;
-  padding: 0.85rem 1.75rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--bronze) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--bronze) !important;
+  border-radius: 999px !important;
+  padding: 0.85rem 1.75rem !important;
+  font-weight: 500 !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+  cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-              background 0.4s, box-shadow 0.4s;
+              background 0.4s, box-shadow 0.4s, color 0.4s;
   box-shadow: 0 8px 20px -8px rgba(184, 137, 79, 0.55);
 }
 .btn-bronze:hover {
-  background: #a4763e;
+  background: #a4763e !important;
+  border-color: #a4763e !important;
+  color: #ffffff !important;
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 14px 26px -10px rgba(184, 137, 79, 0.65);
 }
 .btn-bronze:active { transform: translateY(0) scale(0.99); }
+.btn-bronze:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
 .btn-outline-bronze {
-  background: transparent;
-  color: var(--charcoal);
-  border: 1px solid var(--bronze);
-  border-radius: 999px;
-  padding: 0.85rem 1.75rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent !important;
+  color: var(--charcoal) !important;
+  border: 1px solid var(--bronze) !important;
+  border-radius: 999px !important;
+  padding: 0.85rem 1.75rem !important;
+  font-weight: 500 !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+  cursor: pointer;
   transition: background 0.4s, color 0.4s, transform 0.4s;
 }
 .btn-outline-bronze:hover {
-  background: var(--bronze);
-  color: #fff;
+  background: var(--bronze) !important;
+  color: #ffffff !important;
   transform: translateY(-2px);
 }
 
-/* Floating quote button pulse */
+/* WhatsApp-style CTA — used only on the final submit button in the quote form */
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: #1FA654 !important;
+  color: #ffffff !important;
+  border: 1px solid #1FA654 !important;
+  border-radius: 999px !important;
+  padding: 0.95rem 2rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.4s, box-shadow 0.4s;
+  box-shadow: 0 10px 24px -10px rgba(31, 166, 84, 0.55);
+}
+.btn-whatsapp:hover {
+  background: #178a46 !important;
+  border-color: #178a46 !important;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 16px 30px -12px rgba(31, 166, 84, 0.65);
+}
+.btn-whatsapp:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* Floating quote button pulse (WhatsApp green) */
 @keyframes quotePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(184, 137, 79, 0.5); }
-  50% { box-shadow: 0 0 0 14px rgba(184, 137, 79, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(31, 166, 84, 0.5); }
+  50% { box-shadow: 0 0 0 14px rgba(31, 166, 84, 0); }
 }
 .quote-pulse { animation: quotePulse 2.6s infinite; }
 
